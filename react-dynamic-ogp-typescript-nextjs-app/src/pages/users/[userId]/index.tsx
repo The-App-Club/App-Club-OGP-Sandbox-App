@@ -4,6 +4,8 @@ import { cwd } from 'process'
 
 import { lazy, Suspense } from 'react'
 
+import Head from 'next/head'
+
 import { Box } from '@mui/joy'
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 
@@ -30,6 +32,11 @@ const UserPage: NextPage<{ user: UserData }> = ({ user }) => {
           </Box>
         }
       >
+        {/* https://dev.to/inthepocket/dynamic-open-graph-images-with-nextjs-jg7 */}
+        <Head>
+          <title>{`Next.js | ${user?.name}`}</title>
+          <meta property='og:image' content={`/generated/${user?.id}.png`} />
+        </Head>
         <User user={user} />
       </Suspense>
     </ErrorBoundary>
