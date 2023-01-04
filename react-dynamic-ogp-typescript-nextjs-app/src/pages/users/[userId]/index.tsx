@@ -1,3 +1,7 @@
+import { readFileSync } from 'fs'
+import { join } from 'path'
+import { cwd } from 'process'
+
 import { lazy, Suspense } from 'react'
 
 import { Box } from '@mui/joy'
@@ -33,54 +37,102 @@ const UserPage: NextPage<{ user: UserData }> = ({ user }) => {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const response = await fetch(
-    `${env.NEXT_PUBLIC_BACKEND_ENDPOINT_BASE_URL}/data/users.json`
-  )
-  const data: UsersData = await response.json()
+  if (env.NODE_ENV === 'production') {
+    const localFilePath = join(cwd(), 'src', 'data', 'users.json')
+    const rawData = readFileSync(localFilePath).toString('utf-8')
+    const data: UsersData = JSON.parse(rawData)
 
-  if (!data) {
-    return {
-      paths: [],
-      fallback: false,
+    if (!data) {
+      return {
+        paths: [],
+        fallback: false,
+      }
     }
-  }
-  const paths = data.map((item: UserData, index: number) => ({
-    params: {
-      userId: `${item?.id}`,
-    },
-  }))
+    const paths = data.map((item: UserData, index: number) => ({
+      params: {
+        userId: `${item?.id}`,
+      },
+    }))
 
-  return { paths, fallback: false }
+    return { paths, fallback: false }
+  } else {
+    const response = await fetch(
+      `${env.NEXT_PUBLIC_BACKEND_ENDPOINT_BASE_URL}/data/users.json`
+    )
+    const data: UsersData = await response.json()
+
+    if (!data) {
+      return {
+        paths: [],
+        fallback: false,
+      }
+    }
+    const paths = data.map((item: UserData, index: number) => ({
+      params: {
+        userId: `${item?.id}`,
+      },
+    }))
+
+    return { paths, fallback: false }
+  }
 }
 
 export const getStaticProps: GetStaticProps = async (context) => {
   const { params } = context
 
-  const response = await fetch(
-    `${env.NEXT_PUBLIC_BACKEND_ENDPOINT_BASE_URL}/data/users.json`
-  )
-  const data: UsersData = await response.json()
-  if (!data) {
+  if (env.NODE_ENV === 'production') {
+    const localFilePath = join(cwd(), 'src', 'data', 'users.json')
+    const rawData = readFileSync(localFilePath).toString('utf-8')
+    const data: UsersData = JSON.parse(rawData)
+    if (!data) {
+      return {
+        props: {
+          user: null,
+        },
+        revalidate: 10,
+      }
+    }
+    const matchedData = data.find((item: UserData) => {
+      return item?.id === params?.userId
+    })
+
+    data.forEach((item: UserData, index: number) => {
+      void createOGP(item?.id)
+    })
+
     return {
       props: {
-        user: null,
+        user: matchedData,
       },
       revalidate: 10,
     }
-  }
-  const matchedData = data.find((item: UserData) => {
-    return item?.id === params?.userId
-  })
+  } else {
+    const response = await fetch(
+      `${env.NEXT_PUBLIC_BACKEND_ENDPOINT_BASE_URL}/data/users.json`
+    )
+    const data: UsersData = await response.json()
+    if (!data) {
+      return {
+        props: {
+          user: null,
+        },
+        revalidate: 10,
+      }
+    }
+    const matchedData = data.find((item: UserData) => {
+      return item?.id === params?.userId
+    })
 
-  data.forEach((item: UserData, index: number) => {
-    void createOGP(item?.id)
-  })
+    data.forEach((item: UserData, index: number) => {
+      void createOGP(item?.id)
+    })
 
-  return {
-    props: {
-      user: matchedData,
-    },
-    revalidate: 10,
+    return {
+      props: {
+        user: matchedData,
+      },
+      revalidate: 10,
+    }
   }
 }
 

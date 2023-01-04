@@ -34,7 +34,7 @@ const Header = () => {
           <Logo width={40} height={40} />
         </Link>
       </NextLink>
-      {env.NEXT_PUBLIC_DEBUG_FLG && (
+      {!!env.NEXT_PUBLIC_DEBUG_FLG && (
         <Box
           css={css`
             display: flex;
