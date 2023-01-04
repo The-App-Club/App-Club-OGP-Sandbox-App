@@ -3,7 +3,7 @@
 import NextLink from 'next/link'
 
 import { css } from '@emotion/react'
-import { Box, Divider, Typography } from '@mui/joy'
+import { Avatar, Box, Divider, Typography } from '@mui/joy'
 import { Link } from '@mui/joy'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft } from 'phosphor-react'
@@ -59,13 +59,52 @@ const UsersPage = () => {
     }
 
     return (
-      <ul>
+      <ul
+        css={css`
+          list-style: none;
+        `}
+      >
         {data?.map((item, index) => {
+          // https://stackoverflow.com/a/1828032/15972569
+          // https://getcssscan.com/css-box-shadow-examples
           return (
-            <li key={index}>
+            <li
+              key={index}
+              css={css`
+                min-height: 6rem;
+                box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+              `}
+            >
               <NextLink href={`/users/${item?.id}`} passHref>
                 <Link>
-                  <Typography>{item?.name}</Typography>
+                  <Box
+                    css={css`
+                      display: flex;
+                      align-items: center;
+                      gap: 0.5rem;
+                      padding: 0.5rem 1rem;
+                    `}
+                  >
+                    <Avatar
+                      alt={`${item?.name}`}
+                      src={`${item?.avator}`}
+                      size={`lg`}
+                    />
+                    <Box>
+                      <Typography
+                        component={'b'}
+                        css={css`
+                          font-size: 1.125rem; /* 18px */
+                          line-height: 1.75rem; /* 28px */
+                        `}
+                      >
+                        {item?.name}
+                      </Typography>
+                      <Spacer />
+                      <Divider />
+                      <Typography color='neutral'>{item?.email}</Typography>
+                    </Box>
+                  </Box>
                 </Link>
               </NextLink>
             </li>

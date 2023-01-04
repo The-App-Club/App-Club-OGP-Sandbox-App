@@ -1,17 +1,26 @@
 [
   {
-    "id": "clch0pnbz0000356nwe5g39mn",
+    "id": "clchq0xgv0000356xva5ett3m",
     "name": "Spike",
-    "email": "spike@bebop.comwboy"
+    "email": "spike@bebop.cowboy",
+    "avator": "https://robohash.org/5da3591db13dabfeac13904277e61b92?set=set4&bgset=&size=200x200"
   },
   {
-    "id": "clch0pnbz0001356nu0sooi0p",
+    "id": "clchq0xgy0001356xzqybc3o9",
     "name": "Fei",
-    "email": "fei@bebop.comwboy"
+    "email": "fei@bebop.cowboy",
+    "avator": "https://robohash.org/691287225e69b92f2a5d68e8d07ac1c9?set=set4&bgset=&size=200x200"
   },
   {
-    "id": "clch0pnbz0002356necun4p2o",
+    "id": "clchq0xh00002356xvucfeht1",
     "name": "Dacchi",
-    "email": "dacchi@bebop.comwboy"
+    "email": "dacchi@bebop.cowboy",
+    "avator": "https://robohash.org/8b680450dfdd291afe8d193d7bb4275f?set=set4&bgset=&size=200x200"
+  },
+  {
+    "id": "clchq0xh10003356xm9orr003",
+    "name": "Edo",
+    "email": "edo@bebop.cowboy",
+    "avator": "https://robohash.org/5b0aff44a8697823562e401f00eccac9?set=set4&bgset=&size=200x200"
   }
 ]
