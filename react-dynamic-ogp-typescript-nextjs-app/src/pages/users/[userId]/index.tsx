@@ -1,22 +1,34 @@
-import React from 'react'
+import { lazy, Suspense } from 'react'
 
-import { useRouter } from 'next/router'
-
+import { Box } from '@mui/joy'
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 
+import ErrorBoundary from '@/components/fallback/ErrorBoundary'
+import { FallbackLoading } from '@/components/fallback/FallbackLoading'
 import { env } from '@/config/env'
+import { UserData, UsersData } from '@/features/user/types'
 import { createOGP } from '@/libs/createOGP'
 
-import { User } from '..'
+const User = lazy(() => import('@/features/user/components/User'))
 
 // https://stackoverflow.com/a/71013990/15972569
-const SamplePage: NextPage<{ user: User }> = ({ user }) => {
-  console.log(`user`, user)
-  const router = useRouter()
+const UserPage: NextPage<{ user: UserData }> = ({ user }) => {
   return (
-    <div>
-      <h1>{router.query.dynamic}</h1>
-    </div>
+    <ErrorBoundary>
+      <Suspense
+        fallback={
+          <Box
+            className={
+              'mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-7xl items-center justify-center'
+            }
+          >
+            <FallbackLoading />
+          </Box>
+        }
+      >
+        <User user={user} />
+      </Suspense>
+    </ErrorBoundary>
   )
 }
 
@@ -24,11 +36,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const response = await fetch(
     `${env.NEXT_PUBLIC_BACKEND_ENDPOINT_BASE_URL}/data/users.json`
   )
-  const json: User[] = await response.json()
+  const data: UsersData = await response.json()
 
-  const paths = json.map((item: User, index: number) => ({
+  if (!data) {
+    return {
+      paths: [],
+      fallback: false,
+    }
+  }
+  const paths = data.map((item: UserData, index: number) => ({
     params: {
-      userId: `${item.id}`,
+      userId: `${item?.id}`,
     },
   }))
 
@@ -41,13 +59,21 @@ export const getStaticProps: GetStaticProps = async (context) => {
   const response = await fetch(
     `${env.NEXT_PUBLIC_BACKEND_ENDPOINT_BASE_URL}/data/users.json`
   )
-  const json: User[] = await response.json()
-  const matchedData = json.find((item: User) => {
-    return item.id === params?.userId
+  const data: UsersData = await response.json()
+  if (!data) {
+    return {
+      props: {
+        user: null,
+      },
+      revalidate: 10,
+    }
+  }
+  const matchedData = data.find((item: UserData) => {
+    return item?.id === params?.userId
   })
 
-  json.forEach((item: User, index: number) => {
-    void createOGP(item.id)
+  data.forEach((item: UserData, index: number) => {
+    void createOGP(item?.id)
   })
 
   return {
@@ -58,4 +84,4 @@ export const getStaticProps: GetStaticProps = async (context) => {
   }
 }
 
-export default SamplePage
+export default UserPage

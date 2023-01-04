@@ -28,8 +28,8 @@ const Home = () => {
       <NextLink href={`/issues`} passHref>
         <Link underline='none'>issues</Link>
       </NextLink>
-      <NextLink href={`/satori-ogp`} passHref>
-        <Link underline='none'>satori</Link>
+      <NextLink href={`/users`} passHref>
+        <Link underline='none'>users</Link>
       </NextLink>
     </Box>
   )

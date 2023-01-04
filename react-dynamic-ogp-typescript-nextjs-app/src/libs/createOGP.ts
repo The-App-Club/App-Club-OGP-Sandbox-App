@@ -3,7 +3,10 @@ import path from 'path'
 
 import { createCanvas, loadImage, registerFont } from 'canvas'
 
-const createOGP = async (slug: string): Promise<void> => {
+const createOGP = async (slug: string | null | undefined): Promise<void> => {
+  if (!slug) {
+    return Promise.resolve()
+  }
   const cacheAge = 7 * 24 * 60
   const WIDTH = 1280 as const
   const HEIGHT = 670 as const
