@@ -36,103 +36,67 @@ const UserPage: NextPage<{ user: UserData }> = ({ user }) => {
   )
 }
 
+const fetcher = (): Promise<UsersData> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (env.NODE_ENV === 'production') {
+        const localFilePath = join(cwd(), 'src', 'data', 'users.json')
+        const rawData = readFileSync(localFilePath).toString('utf-8')
+        const data: UsersData = JSON.parse(rawData)
+        resolve(data)
+      } else {
+        const response = await fetch(
+          `${env.NEXT_PUBLIC_BACKEND_ENDPOINT_BASE_URL}/data/users.json`
+        )
+        const data: UsersData = await response.json()
+        resolve(data)
+      }
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
+
 export const getStaticPaths: GetStaticPaths = async () => {
-  if (env.NODE_ENV === 'production') {
-    const localFilePath = join(cwd(), 'src', 'data', 'users.json')
-    const rawData = readFileSync(localFilePath).toString('utf-8')
-    const data: UsersData = JSON.parse(rawData)
-
-    if (!data) {
-      return {
-        paths: [],
-        fallback: false,
-      }
+  const data = await fetcher()
+  if (!data) {
+    return {
+      paths: [],
+      fallback: false,
     }
-    const paths = data.map((item: UserData, index: number) => ({
-      params: {
-        userId: `${item?.id}`,
-      },
-    }))
-
-    return { paths, fallback: false }
-  } else {
-    const response = await fetch(
-      `${env.NEXT_PUBLIC_BACKEND_ENDPOINT_BASE_URL}/data/users.json`
-    )
-    const data: UsersData = await response.json()
-
-    if (!data) {
-      return {
-        paths: [],
-        fallback: false,
-      }
-    }
-    const paths = data.map((item: UserData, index: number) => ({
-      params: {
-        userId: `${item?.id}`,
-      },
-    }))
-
-    return { paths, fallback: false }
   }
+  const paths = data.map((item: UserData, index: number) => ({
+    params: {
+      userId: `${item?.id}`,
+    },
+  }))
+  return { paths, fallback: false }
 }
 
 export const getStaticProps: GetStaticProps = async (context) => {
   const { params } = context
-
-  if (env.NODE_ENV === 'production') {
-    const localFilePath = join(cwd(), 'src', 'data', 'users.json')
-    const rawData = readFileSync(localFilePath).toString('utf-8')
-    const data: UsersData = JSON.parse(rawData)
-    if (!data) {
-      return {
-        props: {
-          user: null,
-        },
-        revalidate: 10,
-      }
-    }
-    const matchedData = data.find((item: UserData) => {
-      return item?.id === params?.userId
-    })
-
-    data.forEach((item: UserData, index: number) => {
-      void createOGP(item?.id)
-    })
-
+  const data = await fetcher()
+  if (!data) {
     return {
       props: {
-        user: matchedData,
+        user: null,
       },
       revalidate: 10,
     }
-  } else {
-    const response = await fetch(
-      `${env.NEXT_PUBLIC_BACKEND_ENDPOINT_BASE_URL}/data/users.json`
-    )
-    const data: UsersData = await response.json()
-    if (!data) {
-      return {
-        props: {
-          user: null,
-        },
-        revalidate: 10,
-      }
-    }
-    const matchedData = data.find((item: UserData) => {
-      return item?.id === params?.userId
-    })
+  }
+  const matchedData = data.find((item: UserData) => {
+    return item?.id === params?.userId
+  })
 
-    data.forEach((item: UserData, index: number) => {
-      void createOGP(item?.id)
-    })
+  data.forEach((item: UserData, index: number) => {
+    void createOGP(item?.id)
+  })
 
-    return {
-      props: {
-        user: matchedData,
-      },
-      revalidate: 10,
-    }
+  return {
+    props: {
+      user: matchedData,
+    },
+    revalidate: 10,
   }
 }
 
